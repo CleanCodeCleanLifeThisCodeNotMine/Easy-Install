@@ -137,18 +137,17 @@ class ExeManagerApp:
         if extension == '.exe' or extension == '.msi':
             # Run without showing the command prompt window
             try:
-                subprocess.run(filepath, shell=True, creationflags=subprocess.CREATE_NO_WINDOW)
+                subprocess.Popen(filepath, shell=True, creationflags=subprocess.CREATE_NO_WINDOW)
             except Exception as e:
                 messagebox.showerror("Error", f"Failed to run {filepath}: {e}")
         elif extension == '.inf':
             try:
-                subprocess.run(
+                subprocess.Popen(
                     ['rundll32', 'setupapi,InstallHinfSection', 'DefaultInstall', '128', filepath],
-                    check=True,
                     creationflags=subprocess.CREATE_NO_WINDOW
                 )
-            except subprocess.CalledProcessError:
-                messagebox.showerror("Error", f"Failed to install {filepath}")
+            except Exception as e:
+                messagebox.showerror("Error", f"Failed to install {filepath}: {e}")
         else:
             messagebox.showerror("Unsupported File", f"Unsupported file type: {extension}")
 
