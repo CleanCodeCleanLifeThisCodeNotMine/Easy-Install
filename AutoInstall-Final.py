@@ -56,13 +56,12 @@ class ExeManagerApp:
         ttk.Button(button_frame_top, text="Add Program", command=self.add_program).grid(row=0, column=0, padx=5, pady=5)
         ttk.Button(button_frame_top, text="Remove Selected", command=self.remove_program).grid(row=0, column=1, padx=5, pady=5)
 
-        # Button frame for start, next, and skip actions
+        # Button frame for start and skip actions
         button_frame_bottom = ttk.Frame(self.main_frame)
         button_frame_bottom.pack(anchor='e', pady=5)
 
         ttk.Button(button_frame_bottom, text="Start", command=self.start_running_programs).grid(row=0, column=0, padx=5, pady=5)
-        ttk.Button(button_frame_bottom, text="Next", command=self.run_next_program).grid(row=0, column=1, padx=5, pady=5)
-        ttk.Button(button_frame_bottom, text="Skip", command=self.skip_program).grid(row=0, column=2, padx=5, pady=5)
+        ttk.Button(button_frame_bottom, text="Skip", command=self.skip_program).grid(row=0, column=1, padx=5, pady=5)
 
         # Load initial list items into the listbox
         for exe in self.exe_list:
@@ -114,23 +113,11 @@ class ExeManagerApp:
             self.current_index = selected[0]
         else:
             self.current_index = 0  # Start from the first item if nothing is selected
-        
+
         if self.current_index < len(self.exe_list):
             self.run_program_at_index(self.current_index)
         else:
             messagebox.showinfo("No Programs", "The list is empty or selection is out of range.")
-
-    def run_next_program(self):
-        if self.current_index + 1 < len(self.exe_list):
-            self.current_index += 1
-            while self.current_index in self.skipped_indices:
-                self.current_index += 1
-                if self.current_index >= len(self.exe_list):
-                    messagebox.showinfo("End of List", "All programs in the list have been run or skipped.")
-                    return
-            self.run_program_at_index(self.current_index)
-        else:
-            messagebox.showinfo("End of List", "All programs in the list have been run.")
 
     def skip_program(self):
         if self.current_index + 1 < len(self.exe_list):
@@ -148,10 +135,18 @@ class ExeManagerApp:
         extension = os.path.splitext(filepath)[1].lower()
 
         if extension == '.exe' or extension == '.msi':
-            os.startfile(filepath)
+            # Run without showing the command prompt window
+            try:
+                subprocess.run(filepath, shell=True, creationflags=subprocess.CREATE_NO_WINDOW)
+            except Exception as e:
+                messagebox.showerror("Error", f"Failed to run {filepath}: {e}")
         elif extension == '.inf':
             try:
-                subprocess.run(['rundll32', 'setupapi,InstallHinfSection', 'DefaultInstall', '128', filepath], check=True)
+                subprocess.run(
+                    ['rundll32', 'setupapi,InstallHinfSection', 'DefaultInstall', '128', filepath],
+                    check=True,
+                    creationflags=subprocess.CREATE_NO_WINDOW
+                )
             except subprocess.CalledProcessError:
                 messagebox.showerror("Error", f"Failed to install {filepath}")
         else:
