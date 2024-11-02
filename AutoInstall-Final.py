@@ -68,9 +68,6 @@ class ExeManagerApp:
             self.listbox.insert(tk.END, exe)
 
     def add_program(self):
-        if len(self.exe_list) >= 10:
-            messagebox.showwarning("Limit Reached", "Cannot add more than 10 programs.")
-            return
         filepath = filedialog.askopenfilename(filetypes=[("Executable and Installation files", "*.exe;*.msi;*.inf")])
         if filepath:
             normalized_path = os.path.normpath(filepath).lower()  # Normalize for case-insensitive comparison
@@ -113,7 +110,7 @@ class ExeManagerApp:
             self.current_index = selected[0]
         else:
             self.current_index = 0  # Start from the first item if nothing is selected
-
+        
         if self.current_index < len(self.exe_list):
             self.run_program_at_index(self.current_index)
         else:
